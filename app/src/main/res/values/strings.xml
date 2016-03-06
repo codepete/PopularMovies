@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="movie_poster">Movie image</string>
+    <string name="movie_backdrop">Movie backdrop image.</string>
+    <string name="movie_synopsis">Synopsis</string>
+
+    <array name="movie_filter_title">
+        <item>Popular Movies</item>
+        <item>Top Rated Movies</item>
+    </array>
+
+    <array name="movie_filter_values">
+        <item>popularity.desc</item>
+        <item>vote_average.desc</item>
+        <item>release_date.desc</item>
+    </array>
+</resources>
