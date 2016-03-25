@@ -5,13 +5,20 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 
+import com.peterung.popularmovies.PopularMoviesApplication;
 import com.peterung.popularmovies.R;
-import com.peterung.popularmovies.data.api.Movie;
 import com.peterung.popularmovies.ui.moviedetail.MovieDetailActivity;
 import com.peterung.popularmovies.ui.moviedetail.MovieDetailFragment;
+import com.peterung.popularmovies.utility.MovieDbHelper;
+
+import javax.inject.Inject;
 
 public class MainActivity extends AppCompatActivity implements MoviesFragment.MovieItemListener {
     boolean mTwoPane;
+
+    @Inject
+    MovieDbHelper mMovieDbHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,14 +37,17 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Mo
         } else {
             mTwoPane = false;
         }
+
+        ((PopularMoviesApplication) getApplication()).getComponent().inject(this);
+        mMovieDbHelper.getSyncAccount();
     }
 
     @Override
-    public void onMovieClick(Movie movie) {
+    public void onMovieClick(long movieId) {
 
         if (mTwoPane) {
             Bundle bundle = new Bundle();
-            bundle.putInt("movieId", movie.id);
+            bundle.putLong("movieId", movieId);
 
             MovieDetailFragment fragment = new MovieDetailFragment();
             fragment.setArguments(bundle);
@@ -48,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Mo
                     .commit();
         } else {
             Intent intent = new Intent(this, MovieDetailActivity.class);
-            intent.putExtra("movieId", movie.id);
+            intent.putExtra("movieId", movieId);
             startActivity(intent);
         }
     }

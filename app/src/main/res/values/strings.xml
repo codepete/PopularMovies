@@ -7,11 +7,19 @@
     <array name="movie_filter_title">
         <item>Popular Movies</item>
         <item>Top Rated Movies</item>
+        <item>Favorite Movies</item>
     </array>
 
     <array name="movie_filter_values">
         <item>popularity.desc</item>
         <item>vote_average.desc</item>
-        <item>release_date.desc</item>
+        <item>favorite</item>
     </array>
+
+    <string name="sync_account_type">popularmovies.peterung.com</string>
+    <string name="content_authority">com.peterung.popularmovies</string>
+    <string name="video_thumbnail">Thumbnail of video trailer.</string>
+    <string name="trailers_header_text">Trailers</string>
+    <string name="reviews_header_text">Reviews</string>
+    <string name="share_action_title">Share</string>
 </resources>

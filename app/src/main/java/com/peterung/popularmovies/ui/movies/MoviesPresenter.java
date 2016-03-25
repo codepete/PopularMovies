@@ -1,69 +1,51 @@
 package com.peterung.popularmovies.ui.movies;
 
-import android.support.annotation.NonNull;
-import android.util.Log;
+import com.peterung.popularmovies.Constants;
+import com.peterung.popularmovies.data.repository.MovieRepository;
+import com.peterung.popularmovies.utility.MovieDbHelper;
 
-import com.peterung.popularmovies.data.api.Movie;
-import com.peterung.popularmovies.data.api.MovieService;
-
-import java.util.HashMap;
-
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class MoviesPresenter implements MoviesContract.UserActionsListener {
 
-    public final String TAG = getClass().getSimpleName();
-    public final String POPULAR_FILTER = "popularity.desc";
-    public final String TOP_RATED_FILTER = "vote_average.desc";
+    private MoviesContract.View mMoviesView;
+    private CompositeSubscription mSubscriptions;
+    private MovieDbHelper mMovieDbHelper;
+    private MovieRepository mMovieRepository;
 
-    MoviesContract.View mMoviesView;
-    MovieService mMovieService;
-    CompositeSubscription mSubscriptions;
-
-
-
-    public MoviesPresenter(MovieService service, @NonNull MoviesContract.View view) {
-        mMoviesView = view;
-        mMovieService = service;
+    public MoviesPresenter(MovieRepository movieRepository, MovieDbHelper movieDbHelper) {
         mSubscriptions = new CompositeSubscription();
+        mMovieRepository = movieRepository;
+        mMovieDbHelper = movieDbHelper;
+    }
+
+    @Override
+    public void setView(MoviesContract.View view) {
+        mMoviesView = view;
     }
 
     @Override
     public void loadMovies(String filter) {
-        HashMap<String, String> filters = new HashMap<>();
 
-        if (filter == null) {
-            filter = POPULAR_FILTER;
+        if (!filter.equals(Constants.FAVORITE_FILTER)) {
+            mMovieDbHelper.syncMoviesImmediately();
         }
+        mSubscriptions.clear();
 
-        switch (filter) {
-            case TOP_RATED_FILTER:
-                filters.put("sort_by", TOP_RATED_FILTER);
-                filters.put("vote_count.gte", "1000");
-                break;
-            case POPULAR_FILTER:
-                filters.put("sort_by", POPULAR_FILTER);
-                break;
-            default:
-                filters.put("sort_by", POPULAR_FILTER);
-                break;
-        }
-
-        mMovieService.getMovies(filters)
+        Subscription subscription = mMovieRepository.getMovies(filter)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        moviesResponse -> mMoviesView.showMoviesList(moviesResponse.results),
-                        error -> Log.d(TAG, error.getMessage())
-                );
+                .subscribe(query -> mMoviesView.showMoviesList(query));
 
+        mSubscriptions.add(subscription);
     }
 
     @Override
-    public void openMovieDetails(int pos, Movie movie) {
-        mMoviesView.showMovieDetails(pos, movie);
+    public void openMovieDetails(long movieId) {
+        mMoviesView.showMovieDetails(movieId);
     }
 
 

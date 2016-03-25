@@ -1,8 +1,14 @@
-package com.peterung.popularmovies.data.api;
+package com.peterung.popularmovies.data.model;
+
+import com.google.gson.annotations.SerializedName;
 
 public class Movie {
 
-    public int id;
+    public transient int id;
+
+    @SerializedName("id")
+    public long movieId;
+
     public String title;
     public String overview;
     public String releaseDate;
@@ -16,5 +22,6 @@ public class Movie {
     public float voteAverage;
     public String backdropPath;
     public int[] genreIds;
+
 
 }

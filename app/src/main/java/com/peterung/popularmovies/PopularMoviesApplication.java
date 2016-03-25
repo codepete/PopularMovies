@@ -2,6 +2,8 @@ package com.peterung.popularmovies;
 
 import android.app.Application;
 
+import com.facebook.stetho.Stetho;
+
 public class PopularMoviesApplication extends Application {
 
     private ApplicationComponent mComponent;
@@ -13,6 +15,8 @@ public class PopularMoviesApplication extends Application {
         mComponent = DaggerApplicationComponent.builder()
                 .applicationModule(new ApplicationModule(this))
                 .build();
+
+        Stetho.initializeWithDefaults(this);
 
     }
 

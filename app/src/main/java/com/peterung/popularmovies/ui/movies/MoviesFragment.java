@@ -1,6 +1,7 @@
 package com.peterung.popularmovies.ui.movies;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,15 +15,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 
 import com.peterung.popularmovies.PopularMoviesApplication;
 import com.peterung.popularmovies.R;
-import com.peterung.popularmovies.data.api.Movie;
 import com.peterung.popularmovies.data.api.MovieService;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.peterung.popularmovies.data.repository.SharedPreferencesRepository;
+import com.squareup.sqlbrite.SqlBrite;
 
 import javax.inject.Inject;
 
@@ -33,6 +31,8 @@ public class MoviesFragment extends Fragment implements MoviesContract.View, Ada
     String LOG_TAG = getClass().getSimpleName();
 
     @Inject MovieService mMovieService;
+    @Inject MoviesPresenter mMoviesPresenter;
+    @Inject SharedPreferencesRepository mSharedPreferencesRepository;
 
     @Bind(R.id.movies_list) RecyclerView mRecyclerView;
 
@@ -43,7 +43,7 @@ public class MoviesFragment extends Fragment implements MoviesContract.View, Ada
     MoviesAdapter mMoviesAdapter;
     GridLayoutManager mGridLayoutManager;
     MovieItemListener mMovieItemListener;
-    MoviesPresenter mMoviesPresenter;
+    Cursor mCursor;
     int mPosition;
 
     public MoviesFragment() {
@@ -55,21 +55,19 @@ public class MoviesFragment extends Fragment implements MoviesContract.View, Ada
         super.onCreate(savedInstanceState);
 
         ((PopularMoviesApplication) getActivity().getApplication()).getComponent().inject(this);
-        mMoviesPresenter = new MoviesPresenter(mMovieService, this);
-        mMoviesAdapter = new MoviesAdapter(getContext(), new ArrayList<Movie>(0), mMoviesPresenter);
+
+        mMoviesAdapter = new MoviesAdapter(getContext(), null, mMoviesPresenter);
         mPosition = RecyclerView.NO_POSITION;
+        mMoviesPresenter.setView(this);
 
         if (savedInstanceState != null) {
             mPosition = savedInstanceState.getInt("pos");
         }
-
-
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mMoviesPresenter.loadMovies(null);
     }
 
     @Override
@@ -89,12 +87,15 @@ public class MoviesFragment extends Fragment implements MoviesContract.View, Ada
 
         mToolbar.setTitle("");
         ((MainActivity) getActivity()).setSupportActionBar(mToolbar);
-        SpinnerAdapter spinnerAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.movie_filter_title, R.layout.spinner_item);
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.movie_filter_title, R.layout.spinner_item);
         mSpinner.setAdapter(spinnerAdapter);
         mSpinner.setOnItemSelectedListener(this);
 
+        mSpinner.setSelection(mSharedPreferencesRepository.getSpinnerPosition());
+
         return view;
     }
+
 
     @Override
     public void onAttach(Context context) {
@@ -109,9 +110,7 @@ public class MoviesFragment extends Fragment implements MoviesContract.View, Ada
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if (mPosition != RecyclerView.NO_POSITION) {
-            outState.putInt("pos", mGridLayoutManager.findFirstCompletelyVisibleItemPosition());
-        }
+        outState.putInt("pos", mGridLayoutManager.findFirstCompletelyVisibleItemPosition());
         super.onSaveInstanceState(outState);
     }
 
@@ -119,27 +118,31 @@ public class MoviesFragment extends Fragment implements MoviesContract.View, Ada
     public void onDestroyView() {
         super.onDestroyView();
         mMoviesPresenter.unsubscribe();
+        mCursor.close();
     }
 
     @Override
-    public void showMoviesList(List<Movie> movies) {
-        mMoviesAdapter.replaceData(movies);
+    public void showMoviesList(SqlBrite.Query query) {
+        mCursor = query.run();
+        mMoviesAdapter.changeCursor(mCursor);
+
         if (mPosition != RecyclerView.NO_POSITION) {
             mRecyclerView.scrollToPosition(mPosition);
         }
     }
 
     @Override
-    public void showMovieDetails(int pos, Movie movie) {
-        mPosition = pos;
-        mMovieItemListener.onMovieClick(movie);
+    public void showMovieDetails(long movieId) {
+        mMovieItemListener.onMovieClick(movieId);
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
         String[] filterValues = getResources().getStringArray(R.array.movie_filter_values);
         String filter = filterValues[position];
+
+        mSharedPreferencesRepository.setFilterType(filter);
+        mSharedPreferencesRepository.setSpinnerPosition(position);
 
         mMoviesPresenter.loadMovies(filter);
     }
@@ -149,8 +152,7 @@ public class MoviesFragment extends Fragment implements MoviesContract.View, Ada
         // Don't do anything
     }
 
-
     public interface MovieItemListener {
-        void onMovieClick(Movie movie);
+        void onMovieClick(long movieId);
     }
 }

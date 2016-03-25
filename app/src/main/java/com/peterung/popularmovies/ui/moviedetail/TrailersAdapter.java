@@ -1,4 +1,4 @@
-package com.peterung.popularmovies.ui.movies;
+package com.peterung.popularmovies.ui.moviedetail;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -6,26 +6,25 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.ImageView;
 
 import com.peterung.popularmovies.Constants;
 import com.peterung.popularmovies.R;
 import com.peterung.popularmovies.custom.CursorRecyclerViewAdapter;
-import com.peterung.popularmovies.custom.CustomImageView;
-import com.peterung.popularmovies.data.provider.MovieTable;
+import com.peterung.popularmovies.data.provider.VideoTable;
 import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MoviesAdapter extends CursorRecyclerViewAdapter<MoviesAdapter.ViewHolder> {
+public class TrailersAdapter extends CursorRecyclerViewAdapter<TrailersAdapter.ViewHolder> {
 
-    MoviesPresenter mMoviesPresenter;
+    MovieDetailPresenter mMovieDetailPresenter;
     Context mContext;
 
-    public MoviesAdapter(Context context, Cursor cursor, MoviesPresenter presenter) {
+    public TrailersAdapter(Context context, Cursor cursor, MovieDetailPresenter presenter) {
         super(context, cursor);
-        mMoviesPresenter = presenter;
+        mMovieDetailPresenter = presenter;
         mContext = context;
     }
 
@@ -33,9 +32,9 @@ public class MoviesAdapter extends CursorRecyclerViewAdapter<MoviesAdapter.ViewH
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(R.layout.item_movie, parent, false);
+        View view = inflater.inflate(R.layout.item_trailer, parent, false);
 
-        return new ViewHolder(view, mMoviesPresenter);
+        return new ViewHolder(view, mMovieDetailPresenter);
     }
 
 
@@ -45,39 +44,34 @@ public class MoviesAdapter extends CursorRecyclerViewAdapter<MoviesAdapter.ViewH
             return;
         }
 
-        String posterPath = cursor.getString(MovieTable.COL_POSTER_PATH);
-        String title = cursor.getString(MovieTable.COL_TITLE);
+        String videoId = cursor.getString(VideoTable.COL_KEY);
 
         Picasso.with(mContext)
-                .load(Constants.MOVIE_DB_IMAGE_URL + "w185" + posterPath)
+                .load(String.format(Constants.YOUTUBE_IMAGE_URL_FORMAT, videoId))
                 .placeholder(R.drawable.placeholder)
-                .into(holder.movieImage);
+                .into(holder.trailerImage);
 
-        holder.movieTitle.setText(title);
-        holder.movieId = cursor.getLong(MovieTable.COL_MOVIE_ID);
+        holder.trailerKey = cursor.getString(VideoTable.COL_KEY);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        long movieId;
+        @Bind(R.id.trailer)
+        ImageView trailerImage;
+        String trailerKey;
 
-        @Bind(R.id.movie_image) CustomImageView movieImage;
+        MovieDetailPresenter mMovieDetailPresenter;
 
-        @Bind(R.id.movie_title) TextView movieTitle;
-
-        MoviesPresenter mMoviesPresenter;
-
-        public ViewHolder(View itemView, MoviesPresenter presenter) {
+        public ViewHolder(View itemView, MovieDetailPresenter presenter) {
             super(itemView);
             ButterKnife.bind(this, itemView);
-            mMoviesPresenter = presenter;
+            mMovieDetailPresenter = presenter;
             itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            mMoviesPresenter.openMovieDetails(movieId);
+            mMovieDetailPresenter.playTrailer(trailerKey);
         }
     }
-
 }
