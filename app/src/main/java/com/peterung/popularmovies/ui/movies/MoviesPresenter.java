@@ -2,7 +2,7 @@ package com.peterung.popularmovies.ui.movies;
 
 import com.peterung.popularmovies.Constants;
 import com.peterung.popularmovies.data.repository.MovieRepository;
-import com.peterung.popularmovies.utility.MovieDbHelper;
+import com.peterung.popularmovies.utility.MovieDbUtility;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -13,13 +13,13 @@ public class MoviesPresenter implements MoviesContract.UserActionsListener {
 
     private MoviesContract.View mMoviesView;
     private CompositeSubscription mSubscriptions;
-    private MovieDbHelper mMovieDbHelper;
+    private MovieDbUtility mMovieDbUtility;
     private MovieRepository mMovieRepository;
 
-    public MoviesPresenter(MovieRepository movieRepository, MovieDbHelper movieDbHelper) {
+    public MoviesPresenter(MovieRepository movieRepository, MovieDbUtility movieDbUtility) {
         mSubscriptions = new CompositeSubscription();
         mMovieRepository = movieRepository;
-        mMovieDbHelper = movieDbHelper;
+        mMovieDbUtility = movieDbUtility;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class MoviesPresenter implements MoviesContract.UserActionsListener {
     public void loadMovies(String filter) {
 
         if (!filter.equals(Constants.FAVORITE_FILTER)) {
-            mMovieDbHelper.syncMoviesImmediately();
+            mMovieDbUtility.syncMoviesImmediately();
         }
         mSubscriptions.clear();
 

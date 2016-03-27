@@ -21,7 +21,7 @@ import com.peterung.popularmovies.data.repository.TrailerRepository;
 import com.peterung.popularmovies.data.repository.TrailerRepositoryImpl;
 import com.peterung.popularmovies.ui.moviedetail.MovieDetailPresenter;
 import com.peterung.popularmovies.ui.movies.MoviesPresenter;
-import com.peterung.popularmovies.utility.MovieDbHelper;
+import com.peterung.popularmovies.utility.MovieDbUtility;
 import com.squareup.sqlbrite.BriteContentResolver;
 import com.squareup.sqlbrite.SqlBrite;
 
@@ -65,8 +65,8 @@ public class ApplicationModule {
 
     @Singleton
     @Provides
-    public MovieDbHelper getMovieDbHelper() {
-        return new MovieDbHelper(mContext);
+    public MovieDbUtility getMovieDbHelper() {
+        return new MovieDbUtility(mContext);
     }
 
     @Singleton
@@ -134,15 +134,15 @@ public class ApplicationModule {
     }
 
     @Provides
-    public MoviesPresenter getMoviesPresenter(MovieRepository movieRepository, MovieDbHelper movieDbHelper) {
-        return new MoviesPresenter(movieRepository, movieDbHelper);
+    public MoviesPresenter getMoviesPresenter(MovieRepository movieRepository, MovieDbUtility movieDbUtility) {
+        return new MoviesPresenter(movieRepository, movieDbUtility);
     }
 
     @Provides
     public MovieDetailPresenter getMovieDetailPresenter(MovieRepository movieRepository,
                                                         TrailerRepository trailerRepository,
                                                         ReviewRepository reviewRepository,
-                                                        MovieDbHelper movieDbHelper) {
-        return new MovieDetailPresenter(movieRepository, reviewRepository, trailerRepository, movieDbHelper);
+                                                        MovieDbUtility movieDbUtility) {
+        return new MovieDetailPresenter(movieRepository, reviewRepository, trailerRepository, movieDbUtility);
     }
 }

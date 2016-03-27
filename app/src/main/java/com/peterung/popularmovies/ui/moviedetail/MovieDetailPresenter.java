@@ -4,7 +4,7 @@ import com.peterung.popularmovies.Constants;
 import com.peterung.popularmovies.data.repository.MovieRepository;
 import com.peterung.popularmovies.data.repository.ReviewRepository;
 import com.peterung.popularmovies.data.repository.TrailerRepository;
-import com.peterung.popularmovies.utility.MovieDbHelper;
+import com.peterung.popularmovies.utility.MovieDbUtility;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -18,17 +18,17 @@ public class MovieDetailPresenter implements MovieDetailContract.UserActionListe
     MovieRepository mMovieRepository;
     ReviewRepository mReviewRepository;
     TrailerRepository mTrailerRepository;
-    MovieDbHelper mMovieDbHelper;
+    MovieDbUtility mMovieDbUtility;
 
     public MovieDetailPresenter(MovieRepository movieRepository,
                                 ReviewRepository reviewRepository,
                                 TrailerRepository trailerRepository,
-                                MovieDbHelper movieDbHelper) {
+                                MovieDbUtility movieDbUtility) {
         mSubscriptions = new CompositeSubscription();
         mMovieRepository = movieRepository;
         mReviewRepository = reviewRepository;
         mTrailerRepository = trailerRepository;
-        mMovieDbHelper = movieDbHelper;
+        mMovieDbUtility = movieDbUtility;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class MovieDetailPresenter implements MovieDetailContract.UserActionListe
             return;
         }
 
-        mMovieDbHelper.syncReviewsAndTrailersImmediately(movieId);
+        mMovieDbUtility.syncReviewsAndTrailersImmediately(movieId);
 
         Subscription subscription = mMovieRepository.getMovieByExternalId(movieId)
                 .subscribeOn(Schedulers.io())

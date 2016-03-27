@@ -9,7 +9,7 @@ import com.peterung.popularmovies.PopularMoviesApplication;
 import com.peterung.popularmovies.R;
 import com.peterung.popularmovies.ui.moviedetail.MovieDetailActivity;
 import com.peterung.popularmovies.ui.moviedetail.MovieDetailFragment;
-import com.peterung.popularmovies.utility.MovieDbHelper;
+import com.peterung.popularmovies.utility.MovieDbUtility;
 
 import javax.inject.Inject;
 
@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Mo
     boolean mTwoPane;
 
     @Inject
-    MovieDbHelper mMovieDbHelper;
+    MovieDbUtility mMovieDbUtility;
 
 
     @Override
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Mo
         }
 
         ((PopularMoviesApplication) getApplication()).getComponent().inject(this);
-        mMovieDbHelper.getSyncAccount();
+        mMovieDbUtility.getSyncAccount();
     }
 
     @Override

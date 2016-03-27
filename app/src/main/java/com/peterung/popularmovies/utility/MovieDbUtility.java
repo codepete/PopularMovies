@@ -10,7 +10,7 @@ import android.os.Bundle;
 
 import com.peterung.popularmovies.R;
 
-public class MovieDbHelper {
+public class MovieDbUtility {
 
     // Interval at which to sync with the movie db, in milliseconds.
     // 60 seconds (1 minute) * 180 = 3 hours
@@ -18,7 +18,7 @@ public class MovieDbHelper {
     public final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
     private Context mContext;
 
-    public MovieDbHelper(Context context) {
+    public MovieDbUtility(Context context) {
         mContext = context;
         getSyncAccount();
     }
